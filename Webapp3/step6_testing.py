@@ -18,7 +18,7 @@ def load_training_configuration(run_id):
     st.session_state["model"] = row[2]
     st.session_state["model_params"] = json.loads(row[3])
     st.session_state["model_path"] = row[4]
-
+    # if run_id != 1:
     st.success(f"Configuration ID {run_id} loaded successfully!")
 
 def get_last_id():
@@ -29,30 +29,43 @@ def get_last_id():
     conn.close()
     return last_id if last_id is not None else 0
 
+
+# config = {}
+# config["initial_spacing"] = 2
+# config["vehicles_count"] = 50
+# config["lanes_count"] = 4
+# config["offscreen_rendering"] = False
+# model_path = './models/model_1'
+
 def run():
+    config = {}
     st.header("Step 6: Testing")
     maximum_id = get_last_id()
+    # load_training_configuration(1)
     configID = st.number_input("Enter the Configuration ID", min_value=1, max_value=maximum_id, value=1, step=1)
+
     if st.button(f"Load Configuration RUN ID {configID}"):
         load_training_configuration(configID)
 
     model_path = st.session_state.get("model_path")
     config = st.session_state.get("env_params")
-    config["offscreen_rendering"] = False
+    if config is not None:
+        config["offscreen_rendering"] = False
     # print(config["lanes_count"])
     # --- env configure
     selected_env = st.session_state.get("selected_env", "highway-v0")
     Model = st.session_state.get("model", "DQN")
     if selected_env == "highway-v0":
-        spacing = config["initial_spacing"]
-        num_vehicles = config["vehicles_count"]
-        num_lanes = config["lanes_count"]
-        render = config["offscreen_rendering"]
+        if config is not None:
+            spacing = config["initial_spacing"]
+            num_vehicles = config["vehicles_count"]
+            num_lanes = config["lanes_count"]
+            render = config["offscreen_rendering"]
         # output the configuration
-        st.write(f"Environment: {selected_env}")
-        st.write(f"Vehicle Spacing: {spacing}")
-        st.write(f"Number of Vehicles: {num_vehicles}")
-        st.write(f"Number of Lanes: {num_lanes}")
+            st.write(f"Environment: {selected_env}")
+            st.write(f"Vehicle Spacing: {spacing}")
+            st.write(f"Number of Vehicles: {num_vehicles}")
+            st.write(f"Number of Lanes: {num_lanes}")
         # st.write(f"Off-screen rendering: {render}")
         st.write(f"model path is", model_path)
         # config = {
@@ -76,6 +89,8 @@ def run():
     if st.button("Start Testing"):
         if Model == 'DQN':
             model = DQN.load(model_path, env=env)
+        if Model == 'PPO':
+            model = PPO.load(model_path, env=env)
         # env = RecordVideo(env, video_folder="racetrack_ppo/videos", episode_trigger=lambda e: True)
         # env.unwrapped.set_record_video_wrapper(env)
         env.configure({"simulation_frequency": 15})  # Higher FPS for rendering

@@ -68,7 +68,7 @@ def view_training_history():
         st.write(f"Log Path: {row[5]}")
         # if st.button(f"Load Configuration for ID {row[0]}"):
         #     load_training_configuration(row[0])
-        if st.button(f"View Logs for ID {row[0]}"):
+        if st.button(f"View Logs for ID {row[0]}", key=f"view_logs_{row[0]}"):
             visualize_tensorboard(row[0])
         if st.button(f"Delete Entry ID {row[0]}", key=f"delete_entry_{row[0]}"):
             delete_training_configuration(row[0])
